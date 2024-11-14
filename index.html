@@ -27,7 +27,7 @@
         const ipData = await ipResponse.json();
 
         // Send IP details to the Replit backend server
-        const response = await fetch('https://OblongMiniatureDatum.alexandroghanem.repl.co/verify-ip', {
+        const response = await fetch('https://de970f53-bcf8-4e3e-8dc6-ef25bf97317f-00-3c44d46na7kv8.riker.repl.co/verify-ip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ip: ipData.ip })
