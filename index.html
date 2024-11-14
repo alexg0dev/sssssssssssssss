@@ -26,8 +26,8 @@
         const ipResponse = await fetch('https://ipinfo.io/json?token=64ccb423141df9');
         const ipData = await ipResponse.json();
 
-        // Send IP details to the backend server
-        const response = await fetch('http://localhost:3000/verify-ip', { // Replace with your backend URL if hosted elsewhere
+        // Send IP details to the Replit backend server
+        const response = await fetch('https://OblongMiniatureDatum.alexandroghanem.repl.co/verify-ip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ip: ipData.ip })
