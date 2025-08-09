@@ -3,7 +3,7 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 // Initialize Pusher only if we have the required config
 let pusher = null;
@@ -24,6 +24,7 @@ try {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files with proper headers
 app.use(express.static(path.join(__dirname), {
@@ -64,17 +65,44 @@ app.post('/api/trigger', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    pusher: pusher ? 'connected' : 'not available'
+  });
+});
+
+// Railway health check
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
+// Keep alive endpoint
+app.get('/keepalive', (req, res) => {
+  res.status(200).json({ alive: true });
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  process.exit(0);
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
 
-app.listen(port, '0.0.0.0', () => {
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Debate Hub server running on port ${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Server ready at http://0.0.0.0:${port}`);
+  console.log('Health check available at /health');
 });
