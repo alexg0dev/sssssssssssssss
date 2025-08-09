@@ -38,9 +38,21 @@ app.use(express.static(path.join(__dirname), {
 // Serve static files
 app.get('/', (req, res) => {
   try {
+    console.log('Serving index.html request');
     res.sendFile(path.join(__dirname, 'index.html'));
   } catch (error) {
     console.error('Error serving index.html:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
+// Catch all other routes and serve index.html (SPA behavior)
+app.get('*', (req, res) => {
+  try {
+    console.log(`Serving request for: ${req.path}`);
+    res.sendFile(path.join(__dirname, 'index.html'));
+  } catch (error) {
+    console.error('Error serving file:', error);
     res.status(500).send('Server Error');
   }
 });
