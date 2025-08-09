@@ -1,29 +1,49 @@
 const express = require('express');
-const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
+const Pusher = require('pusher');
+
 const app = express();
+const port = process.env.PORT || 3000;
 
-app.use(express.json());
-
-// Endpoint to receive IP and store it in info.json
-app.post('/verify-ip', (req, res) => {
-  const { ip } = req.body;
-
-  if (!ip) {
-    return res.status(400).json({ message: 'IP address is required.' });
-  }
-
-  const filePath = './info.json';
-  const data = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : [];
-
-  // Add new IP to info.json
-  data.push({ ip, timestamp: new Date().toISOString() });
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-
-  console.log(`Stored new IP: ${ip}`);
-  res.status(200).json({ message: 'IP stored successfully' });
+// Pusher configuration
+const pusher = new Pusher({
+  appId: "1994413",
+  key: "81448c8d861b0292ba68",
+  secret: "64a8f74fb2857985d69b",
+  cluster: "eu",
+  useTLS: true
 });
 
-// Start server on port 3000
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static(__dirname));
+
+// Serve static files
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'index.html'));
+});
+
+// API endpoints for Pusher events
+app.post('/api/trigger', (req, res) => {
+  const { channel, event, data } = req.body;
+  
+  pusher.trigger(channel, event, data)
+    .then(() => {
+      res.json({ success: true });
+    })
+    .catch(err => {
+      console.error('Pusher error:', err);
+      res.status(500).json({ error: 'Failed to trigger event' });
+    });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.listen(port, () => {
+  console.log(`Debate Hub server running on port ${port}`);
 });
