@@ -83,6 +83,22 @@ app.get('/keepalive', (req, res) => {
   res.status(200).json({ alive: true });
 });
 
+// Add a simple interval to keep the process active
+setInterval(() => {
+  console.log(`Server alive - ${new Date().toISOString()}`);
+}, 30000); // Log every 30 seconds
+
+// Prevent the process from exiting unexpectedly
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Don't exit, just log the error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit, just log the error
+});
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
