@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debates - DebateArena.lol | Elite Political Debate Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #0066FF;
+            --primary-purple: #6366F1;
+            --accent-gold: #F59E0B;
+            --success-green: #10B981;
+            --danger-red: #EF4444;
+            --dark-bg: #0A0B0F;
+            --card-bg: #111827;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+            color: white;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .glass-effect {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+        }
+        
+        .topic-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .topic-card.selected {
+            border-color: rgba(99, 102, 241, 0.8);
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+        }
+        
+        .room-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .room-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chat-message {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            animation: slideInMessage 0.3s ease-out;
+        }
+        
+        @keyframes slideInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chat-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        .participant-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            animation: fadeInBadge 0.5s ease-out;
+        }
+        
+        @keyframes fadeInBadge {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-left: 2px solid #6366f1;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auth-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+
+    <!-- Auth Loading Screen -->
+    <div id="auth-loading" class="auth-loading">
+        <div class="text-center">
+            <img src="/images/debatearena.png" alt="DebateArena Logo" class="w-16 h-16 mx-auto mb-4 animate-pulse">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-400">Checking authentication...</p>
+        </div>
+    </div>
+
+    <!-- Fixed Header -->
+    <header class="fixed top-0 w-full z-50 glass-effect" style="display: none;" id="main-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+            <div class="flex justify-between items-center">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="relative">
+                        <a href="/" class="block relative z-20 cursor-pointer">
+                            <img src="/images/debatearena.png" alt="DebateArena Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl shadow-lg hover:scale-105 transition-transform duration-200">
+                        </a>
+                        <div class="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold text-white">DebateArena<span class="text-blue-400">.lol</span></h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Elite Debate Platform</p>
+                    </div>
+                </div>
+                
+                <!-- User Profile -->
+                <div id="user-profile" class="flex items-center space-x-3">
+                    <img id="user-avatar" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-purple-400" src="/images/debatearena.png" alt="User Avatar">
+                    <div class="hidden sm:block">
+                        <div id="user-name" class="text-white font-semibold text-sm">Loading...</div>
+                        <div class="text-gray-400 text-xs">Gladiator</div>
+                    </div>
+                    <button onclick="signOutUser()" class="text-gray-400 hover:text-red-400 transition-colors">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-12" style="display: none;" id="main-content">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            
+            <!-- Page Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl sm:text-6xl font-black text-white mb-4">
+                    Choose Your <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Battle</span>
+                </h1>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Select a debate topic, create or join a room, and engage in intellectual combat with fellow debaters.
+                </p>
+            </div>
+
+            <!-- Topic Selection -->
+            <div id="topic-selection" class="mb-12">
+                <h2 class="text-2xl font-bold text-white mb-6">Select Debate Topic</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="topics-grid">
+                    <div class="flex items-center justify-center p-8">
+                        <div class="loading-spinner"></div>
+                        <span class="ml-3 text-gray-400">Loading topics...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Creation/Join -->
+            <div id="room-section" class="hidden">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    
+                    <!-- Create Room -->
+                    <div class="glass-effect p-8 rounded-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-6">Create New Room</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Room Name</label>
+                                <input type="text" id="room-name" class="w-full px-4 py-3 chat-input rounded-lg" placeholder="Enter room name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Max Participants</label>
+                                <select id="max-participants" class="w-full px-4 py-3 chat-input rounded-lg">
+                                    <option value="2">2 Debaters</option>
+                                    <option value="4">4 Debaters</option>
+                                    <option value="6">6 Debaters</option>
+                                    <option value="8">8 Debaters</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Room Description (Optional)</label>
+                                <textarea id="room-description" class="w-full px-4 py-3 chat-input rounded-lg" rows="3" placeholder="Describe your debate room..."></textarea>
+                            </div>
+                            <button onclick="createRoom()" class="w-full btn-primary px-6 py-3 rounded-lg font-semibold text-white">
+                                <i class="fas fa-plus mr-2"></i>Create Room
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Join Existing Room -->
+                    <div class="glass-effect p-8 rounded-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-6">Join Existing Room</h3>
+                        <div id="rooms-list" class="space-y-4">
+                            <div class="flex items-center justify-center p-8">
+                                <div class="loading-spinner"></div>
+                                <span class="ml-3 text-gray-400">Loading rooms...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debate Room -->
+            <div id="debate-room" class="hidden">
+                <div class="glass-effect p-8 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white" id="current-room-name">Debate Room</h3>
+                            <p class="text-gray-400" id="current-room-description"></p>
+                        </div>
+                        <button onclick="leaveRoom()" class="text-red-400 hover:text-red-300 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Leave Room
+                        </button>
+                    </div>
+                    
+                    <!-- Participants -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-white mb-3">Participants</h4>
+                        <div id="participants-list" class="flex flex-wrap gap-3">
+                            <!-- Participants will be shown here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Area -->
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                            <div class="h-96 overflow-y-auto mb-4 p-4 glass-effect rounded-lg" id="chat-messages">
+                                <div class="text-center text-gray-400 py-8">
+                                    <i class="fas fa-comments text-4xl mb-4"></i>
+                                    <p>Welcome to the debate room! Start the conversation.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <input type="text" id="message-input" class="flex-1 px-4 py-3 chat-input rounded-lg" placeholder="Type your message..." onkeypress="handleMessageKeyPress(event)">
+                                <button onclick="sendMessage()" class="btn-primary px-6 py-3 rounded-lg">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Room Info -->
+                        <div class="glass-effect p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-white mb-4">Room Info</h4>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Topic:</span>
+                                    <span class="text-white" id="room-topic">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Participants:</span>
+                                    <span class="text-white" id="room-participant-count">0/0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Status:</span>
+                                    <span class="text-green-400" id="room-status">Active</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Created:</span>
+                                    <span class="text-white" id="room-created">-</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Room Actions -->
+                            <div class="mt-6 space-y-3">
+                                <button onclick="inviteFriends()" class="w-full glass-effect px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors">
+                                    <i class="fas fa-user-plus mr-2"></i>Invite Friends
+                                </button>
+                                <button onclick="saveDebate()" class="w-full glass-effect px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors">
+                                    <i class="fas fa-bookmark mr-2"></i>Save Debate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, where, serverTimestamp, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase Config - Using actual credentials
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZwpRiBIxi6IRxHRlLxTlRxk5CuhL-v8g",
+            authDomain: "debatearena-daf5c.firebaseapp.com",
+            projectId: "debatearena-daf5c",
+            storageBucket: "debatearena-daf5c.appspot.com",
+            messagingSenderId: "834213499380",
+            appId: "1:834213499380:web:7d2c70cab44e1327c4a9a1",
+            measurementId: "G-J3MPZ20L1Y"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Make Firebase available globally
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseAuthMethods = { onAuthStateChanged, signOut };
+        window.firebaseDbMethods = { doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, where, serverTimestamp, arrayUnion, arrayRemove };
+        
+        console.log('🔥 Firebase initialized for debates page');
+        
+        // Initialize the app after Firebase is ready
+        window.initializeDebatesApp();
+    </script>
+    
+    <!-- Pusher SDK -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        let currentUser = null;
+        let pusher = null;
+        let selectedTopic = null;
+        let currentRoom = null;
+        let currentChannel = null;
+        let messagesUnsubscribe = null;
+        let roomsUnsubscribe = null;
+        let authCheckComplete = false;
+
+        // Debate topics
+        const debateTopics = [
+            { id: 1, name: "Ukraine-Russia Conflict", category: "International", status: "Hot", description: "Discuss diplomatic solutions and international responses" },
+            { id: 2, name: "Israel-Gaza Conflict", category: "International", status: "Hot", description: "Debate ceasefire terms and humanitarian aid" },
+            { id: 3, name: "Iran Nuclear Talks", category: "International", status: "Trending", description: "Nuclear diplomacy and sanctions policy" },
+            { id: 4, name: "US-China Trade War", category: "Economics", status: "Popular", description: "Trade policies and economic relations" },
+            { id: 5, name: "Climate Change Policy", category: "Environment", status: "Rising", description: "Environmental policies and green energy" },
+            { id: 6, name: "AI Regulation", category: "Technology", status: "Active", description: "Artificial intelligence governance and ethics" },
+            { id: 7, name: "Immigration Policy", category: "Politics", status: "Hot", description: "Border security and immigration reform" },
+            { id: 8, name: "Gun Control", category: "Security", status: "Popular", description: "Second Amendment rights and public safety" },
+            { id: 9, name: "Healthcare Reform", category: "Social", status: "Trending", description: "Universal healthcare and medical policy" },
+            { id: 10, name: "Cryptocurrency Regulation", category: "Economics", status: "Rising", description: "Digital currency policy and regulation" }
+        ];
+
+        // Initialize Pusher
+        function initializePusher() {
+            pusher = new Pusher('81448c8d861b0292ba68', {
+                cluster: 'eu',
+                encrypted: true
+            });
+            console.log('📡 Pusher initialized');
+        }
+
+        // Initialize the application - called after Firebase is ready
+        window.initializeDebatesApp = function() {
+            console.log('🚀 Debates page initializing...');
+            
+            initializePusher();
+            checkAuthStatus();
+            
+            console.log('✅ Debates page initialized successfully');
+        };
+
+        // Authentication functions
+        function checkAuthStatus() {
+            console.log('🔐 Checking authentication status...');
+            
+            if (!window.firebaseAuth || !window.firebaseAuthMethods) {
+                console.error('❌ Firebase not properly initialized');
+                redirectToHome();
+                return;
+            }
+
+            // Set a timeout to prevent infinite loading
+            const authTimeout = setTimeout(() => {
+                if (!authCheckComplete) {
+                    console.log('⏰ Auth check timeout, redirecting to home');
+                    redirectToHome();
+                }
+            }, 10000); // 10 second timeout
+
+            window.firebaseAuthMethods.onAuthStateChanged(window.firebaseAuth, async (user) => {
+                authCheckComplete = true;
+                clearTimeout(authTimeout);
+                
+                if (user) {
+                    console.log('👤 User authenticated:', user.displayName || user.email);
+                    currentUser = user;
+                    
+                    // Fetch user data from Firestore
+                    try {
+                        const userDoc = await window.firebaseDbMethods.getDoc(
+                            window.firebaseDbMethods.doc(window.firebaseDb, 'users', user.uid)
+                        );
+                        
+                        if (userDoc.exists()) {
+                            currentUser.discordData = userDoc.data();
+                            console.log('📊 User data loaded:', currentUser.discordData);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error fetching user data:', error);
+                    }
+                    
+                    updateUserProfile(user);
+                    showMainContent();
+                    loadTopics();
+                } else {
+                    console.log('👤 User not authenticated, redirecting to home');
+                    redirectToHome();
+                }
+            });
+        }
+
+        function redirectToHome() {
+            console.log('🏠 Redirecting to home page...');
+            window.location.href = '/';
+        }
+
+        function showMainContent() {
+            console.log('✅ Showing main content');
+            document.getElementById('auth-loading').style.display = 'none';
+            document.getElementById('main-header').style.display = 'block';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function updateUserProfile(user) {
+            const userName = document.getElementById('user-name');
+            const userAvatar = document.getElementById('user-avatar');
+            
+            if (userName) {
+                const displayName = currentUser.discordData?.displayName || 
+                                  currentUser.discordData?.global_name || 
+                                  user.displayName || 
+                                  user.email;
+                userName.textContent = displayName;
+            }
+            
+            if (userAvatar) {
+                if (currentUser.discordData?.avatar) {
+                    userAvatar.src = `https://cdn.discordapp.com/avatars/${currentUser.discordData.id}/${currentUser.discordData.avatar}.png?size=128`;
+                } else if (user.photoURL) {
+                    userAvatar.src = user.photoURL;
+                } else {
+                    const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+                    userAvatar.src = `/placeholder.svg?height=40&width=40&text=${initials}`;
+                }
+            }
+        }
+
+        async function signOutUser() {
+            try {
+                await window.firebaseAuthMethods.signOut(window.firebaseAuth);
+                console.log('✅ Sign out successful');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('❌ Sign out failed:', error);
+            }
+        }
+
+        // Topic functions
+        function loadTopics() {
+            const topicsGrid = document.getElementById('topics-grid');
+            topicsGrid.innerHTML = '';
+            
+            debateTopics.forEach(topic => {
+                const topicCard = document.createElement('div');
+                topicCard.className = 'topic-card p-6 rounded-xl';
+                topicCard.onclick = () => selectTopic(topic);
+                
+                const statusColors = {
+                    'Hot': 'bg-red-500',
+                    'Trending': 'bg-orange-500',
+                    'Popular': 'bg-blue-500',
+                    'Rising': 'bg-yellow-500',
+                    'Active': 'bg-purple-500'
+                };
+                
+                topicCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-white text-lg">${topic.name}</h3>
+                        <span class="text-xs ${statusColors[topic.status]} text-white px-2 py-1 rounded-full font-semibold">${topic.status}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-3">Category: ${topic.category}</p>
+                    <p class="text-xs text-gray-500">${topic.description}</p>
+                `;
+                
+                topicsGrid.appendChild(topicCard);
+            });
+        }
+
+        function selectTopic(topic) {
+            selectedTopic = topic;
+            
+            // Update UI to show selected topic
+            document.querySelectorAll('.topic-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Show room section
+            document.getElementById('room-section').classList.remove('hidden');
+            
+            // Load existing rooms for this topic
+            loadRoomsForTopic(topic.id);
+            
+            console.log('📋 Topic selected:', topic.name);
+        }
+
+        // Room functions
+        async function loadRoomsForTopic(topicId) {
+            const roomsList = document.getElementById('rooms-list');
+            roomsList.innerHTML = `
+                <div class="flex items-center justify-center p-8">
+                    <div class="loading-spinner"></div>
+                    <span class="ml-3 text-gray-400">Loading rooms...</span>
+                </div>
+            `;
+            
+            try {
+                // Query rooms for this topic from Firestore
+                const roomsQuery = window.firebaseDbMethods.query(
+                    window.firebaseDbMethods.collection(window.firebaseDb, 'rooms'),
+                    window.firebaseDbMethods.where('topicId', '==', topicId),
+                    window.firebaseDbMethods.where('status', '==', 'active'),
+                    window.firebaseDbMethods.orderBy('createdAt', 'desc')
+                );
+                
+                // Set up real-time listener
+                if (roomsUnsubscribe) {
+                    roomsUnsubscribe();
+                }
+                
+                roomsUnsubscribe = window.firebaseDbMethods.onSnapshot(roomsQuery, (snapshot) => {
+                    const rooms = [];
+                    snapshot.forEach((doc) => {
+                        rooms.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    displayRooms(rooms);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error loading rooms:', error);
+                roomsList.innerHTML = '<p class="text-red-400 text-center py-8">Error loading rooms. Please try again.</p>';
+            }
+        }
+
+        function displayRooms(rooms) {
+            const roomsList = document.getElementById('rooms-list');
+            
+            if (rooms.length === 0) {
+                roomsList.innerHTML = '<p class="text-gray-400 text-center py-8">No active rooms for this topic. Create one!</p>';
+                return;
+            }
+            
+            roomsList.innerHTML = '';
+            
+            rooms.forEach(room => {
+                const roomCard = document.createElement('div');
+                roomCard.className = 'room-card p-4 rounded-lg';
+                roomCard.onclick = () => joinRoom(room);
+                
+                const createdAt = room.createdAt?.toDate ? room.createdAt.toDate().toLocaleString() : 'Recently';
+                const participantCount = room.participants ? room.participants.length : 0;
+                
+                roomCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-semibold text-white">${room.name}</h4>
+                        <span class="text-xs ${room.status === 'active' ? 'text-green-400' : 'text-yellow-400'}">${room.status}</span>
+                    </div>
+                    <div class="text-sm text-gray-400 mb-2">
+                        Participants: ${participantCount}/${room.maxParticipants}
+                    </div>
+                    ${room.description ? `<div class="text-xs text-gray-500 mb-2">${room.description}</div>` : ''}
+                    <div class="text-xs text-gray-500">Created: ${createdAt}</div>
+                `;
+                
+                roomsList.appendChild(roomCard);
+            });
+        }
+
+        async function createRoom() {
+            const roomName = document.getElementById('room-name').value.trim();
+            const maxParticipants = parseInt(document.getElementById('max-participants').value);
+            const roomDescription = document.getElementById('room-description').value.trim();
+            
+            if (!roomName) {
+                alert('Please enter a room name');
+                return;
+            }
+            
+            if (!selectedTopic) {
+                alert('Please select a topic first');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('You must be logged in to create a room');
+                return;
+            }
+            
+            try {
+                const roomData = {
+                    name: roomName,
+                    description: roomDescription,
+                    topicId: selectedTopic.id,
+                    topicName: selectedTopic.name,
+                    maxParticipants: maxParticipants,
+                    participants: [{
+                        uid: currentUser.uid,
+                        displayName: currentUser.discordData?.displayName || currentUser.displayName || currentUser.email,
+                        avatar: currentUser.discordData?.avatar || null,
+                        joinedAt: window.firebaseDbMethods.serverTimestamp()
+                    }],
+                    createdBy: currentUser.uid,
+                    createdAt: window.firebaseDbMethods.serverTimestamp(),
+                    status: 'active'
+                };
+                
+                console.log('🏠 Creating room:', roomData);
+                
+                const docRef = await window.firebaseDbMethods.addDoc(
+                    window.firebaseDbMethods.collection(window.firebaseDb, 'rooms'),
+                    roomData
+                );
+                
+                // Clear form
+                document.getElementById('room-name').value = '';
+                document.getElementById('room-description').value = '';
+                
+                // Join the created room
+                const createdRoom = { id: docRef.id, ...roomData };
+                joinRoom(createdRoom);
+                
+            } catch (error) {
+                console.error('❌ Error creating room:', error);
+                alert('Failed to create room. Please try again.');
+            }
+        }
+
+        async function joinRoom(room) {
+            if (!currentUser) {
+                alert('You must be logged in to join a room');
+                return;
+            }
+            
+            try {
+                // Check if user is already in the room
+                const isAlreadyParticipant = room.participants?.some(p => p.uid === currentUser.uid);
+                
+                if (!isAlreadyParticipant) {
+                    // Add user to room participants
+                    const roomRef = window.firebaseDbMethods.doc(window.firebaseDb, 'rooms', room.id);
+                    await window.firebaseDbMethods.updateDoc(roomRef, {
+                        participants: window.firebaseDbMethods.arrayUnion({
+                            uid: currentUser.uid,
+                            displayName: currentUser.discordData?.displayName || currentUser.displayName || currentUser.email,
+                            avatar: currentUser.discordData?.avatar || null,
+                            joinedAt: window.firebaseDbMethods.serverTimestamp()
+                        })
+                    });
+                }
+                
+                currentRoom = room;
+                
+                // Hide topic selection and room section
+                document.getElementById('topic-selection').classList.add('hidden');
+                document.getElementById('room-section').classList.add('hidden');
+                document.getElementById('debate-room').classList.remove('hidden');
+                
+                // Update room info
+                document.getElementById('current-room-name').textContent = room.name;
+                document.getElementById('current-room-description').textContent = room.description || '';
+                document.getElementById('room-topic').textContent = room.topicName;
+                document.getElementById('room-participant-count').textContent = `${room.participants?.length || 1}/${room.maxParticipants}`;
+                document.getElementById('room-created').textContent = room.createdAt?.toDate ? room.createdAt.toDate().toLocaleString() : 'Recently';
+                
+                // Subscribe to Pusher channel for this room
+                currentChannel = pusher.subscribe(`debate-room-${room.id}`);
+                currentChannel.bind('new-message', handleNewMessage);
+                currentChannel.bind('user-joined', handleUserJoined);
+                currentChannel.bind('user-left', handleUserLeft);
+                
+                // Load chat messages from Firestore
+                loadChatMessages(room.id);
+                
+                // Update participants list
+                updateParticipantsList();
+                
+                // Send join notification via Pusher
+                await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        roomId: room.id,
+                        message: {
+                            type: 'user-joined',
+                            user: {
+                                uid: currentUser.uid,
+                                displayName: currentUser.discordData?.displayName || currentUser.displayName || currentUser.email,
+                                avatar: currentUser.discordData?.avatar || null
+                            }
+                        }
+                    })
+                });
+                
+                console.log('🚪 Joined room:', room.name);
+                
+            } catch (error) {
+                console.error('❌ Error joining room:', error);
+                alert('Failed to join room. Please try again.');
+            }
+        }
+
+        async function leaveRoom() {
+            if (!currentRoom || !currentUser) return;
+            
+            try {
+                // Remove user from room participants
+                const roomRef = window.firebaseDbMethods.doc(window.firebaseDb, 'rooms', currentRoom.id);
+                await window.firebaseDbMethods.updateDoc(roomRef, {
+                    participants: window.firebaseDbMethods.arrayRemove({
+                        uid: currentUser.uid,
+                        displayName: currentUser.discordData?.displayName || currentUser.displayName || currentUser.email,
+                        avatar: currentUser.discordData?.avatar || null,
+                        joinedAt: currentUser.joinedAt // This might not match exactly, but it's the best we can do
+                    })
+                });
+                
+                // Send leave notification via Pusher
+                await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        roomId: currentRoom.id,
+                        message: {
+                            type: 'user-left',
+                            user: {
+                                uid: currentUser.uid,
+                                displayName: currentUser.discordData?.displayName || currentUser.displayName || currentUser.email,
+                                avatar: currentUser.discordData?.avatar || null
+                            }
+                        }
+                    })
+                });
+                
+            } catch (error) {
+                console.error('❌ Error leaving room:', error);
+            }
+            
+            // Unsubscribe from Pusher channel
+            if (currentChannel) {
+                pusher.unsubscribe(`debate-room-${currentRoom.id}`);
+                currentChannel = null;
+            }
+            
+            // Unsubscribe from Firestore messages
+            if (messagesUnsubscribe) {
+                messagesUnsubscribe();
+                messagesUnsubscribe = null;
+            }
+            
+            currentRoom = null;
+            
+            // Show topic selection and room section
+            document.getElementById('debate-room').classList.add('hidden');
+            document.getElementById('topic-selection').classList.remove('hidden');
+            document.getElementById('room-section').classList.remove('hidden');
+            
+            // Clear chat messages
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="text-center text-gray-400 py-8">
+                    <i class="fas fa-comments text-4xl mb-4"></i>
+                    <p>Welcome to the debate room! Start the conversation.</p>
+                </div>
+            `;
+            
+            console.log('🚪 Left room');
+        }
+
+        function updateParticipantsList() {
+            const participantsList = document.getElementById('participants-list');
+            participantsList.innerHTML = '';
+            
+            if (!currentRoom || !currentRoom.participants) return;
+            
+            currentRoom.participants.forEach(participant => {
+                const participantBadge = document.createElement('div');
+                participantBadge.className = 'participant-badge flex items-center space-x-2 rounded-full px-3 py-1';
+                
+                const isCurrentUser = participant.uid === currentUser.uid;
+                const avatarUrl = participant.avatar ? 
+                    `https://cdn.discordapp.com/avatars/${participant.uid}/${participant.avatar}.png?size=64` :
+                    `/placeholder.svg?height=24&width=24&text=${participant.displayName.charAt(0).toUpperCase()}`;
+                
+                participantBadge.innerHTML = `
+                    <img src="${avatarUrl}" alt="Avatar" class="w-6 h-6 rounded-full">
+                    <span class="text-sm text-white">${participant.displayName}</span>
+                    ${isCurrentUser ? '<span class="text-xs text-purple-400">(You)</span>' : ''}
+                `;
+                
+                participantsList.appendChild(participantBadge);
+            });
+        }
+
+        // Chat functions
+        function loadChatMessages(roomId) {
+            try {
+                const messagesQuery = window.firebaseDbMethods.query(
+                    window.firebaseDbMethods.collection(window.firebaseDb, 'rooms', roomId, 'messages'),
+                    window.firebaseDbMethods.orderBy('timestamp', 'asc')
+                );
+                
+                if (messagesUnsubscribe) {
+                    messagesUnsubscribe();
+                }
+                
+                messagesUnsubscribe = window.firebaseDbMethods.onSnapshot(messagesQuery, (snapshot) => {
+                    const chatMessages = document.getElementById('chat-messages');
+                    
+                    // Clear existing messages except welcome message
+                    const welcomeMessage = chatMessages.querySelector('.text-center');
+                    if (welcomeMessage && snapshot.docs.length > 0) {
+                        chatMessages.innerHTML = '';
+                    }
+                    
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            const messageData = change.doc.data();
+                            addMessageToChat(messageData, false); // false = don't trigger via Pusher
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error('❌ Error loading chat messages:', error);
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentRoom || !currentUser) return;
+            
+            try {
+                const messageData = {
+                    text: message,
+                    userId: currentUser.uid,
+                    userDisplayName: currentUser.discordData?.displayName || currentUser.displayName || currentUser.email,
+                    userAvatar: currentUser.discordData?.avatar || null,
+                    timestamp: window.firebaseDbMethods.serverTimestamp(),
+                    roomId: currentRoom.id
+                };
+                
+                // Save message to Firestore
+                await window.firebaseDbMethods.addDoc(
+                    window.firebaseDbMethods.collection(window.firebaseDb, 'rooms', currentRoom.id, 'messages'),
+                    messageData
+                );
+                
+                // Send via Pusher for real-time updates
+                await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        roomId: currentRoom.id,
+                        message: {
+                            ...messageData,
+                            timestamp: new Date().toISOString()
+                        }
+                    })
+                });
+                
+                // Clear input
+                messageInput.value = '';
+                
+                console.log('💬 Message sent:', message);
+                
+            } catch (error) {
+                console.error('❌ Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+            }
+        }
+
+        function handleMessageKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function addMessageToChat(messageData, fromPusher = true) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message';
+            
+            const isOwnMessage = messageData.userId === currentUser.uid;
+            const timestamp = messageData.timestamp?.toDate ? 
+                messageData.timestamp.toDate().toLocaleTimeString() :
+                new Date(messageData.timestamp).toLocaleTimeString();
+            
+            const avatarUrl = messageData.userAvatar ? 
+                `https://cdn.discordapp.com/avatars/${messageData.userId}/${messageData.userAvatar}.png?size=64` :
+                `/placeholder.svg?height=32&width=32&text=${messageData.userDisplayName.charAt(0).toUpperCase()}`;
+            
+            messageElement.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="${avatarUrl}" alt="Avatar" class="w-8 h-8 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold text-white text-sm">${messageData.userDisplayName}</span>
+                            ${isOwnMessage ? '<span class="text-xs text-purple-400">(You)</span>' : ''}
+                            <span class="text-xs text-gray-400">${timestamp}</span>
+                        </div>
+                        <p class="text-gray-300">${messageData.text}</p>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function handleNewMessage(messageData) {
+            // Only add if it's not from current user (to avoid duplicates from Firestore)
+            if (messageData.userId !== currentUser.uid) {
+                addMessageToChat(messageData, true);
+            }
+        }
+
+        function handleUserJoined(userData) {
+            console.log('👤 User joined:', userData.user.displayName);
+            
+            // Add system message
+            const systemMessage = {
+                text: `${userData.user.displayName} joined the debate`,
+                userId: 'system',
+                userDisplayName: 'System',
+                userAvatar: null,
+                timestamp: new Date().toISOString(),
+                isSystem: true
+            };
+            addSystemMessage(systemMessage);
+        }
+
+        function handleUserLeft(userData) {
+            console.log('👤 User left:', userData.user.displayName);
+            
+            // Add system message
+            const systemMessage = {
+                text: `${userData.user.displayName} left the debate`,
+                userId: 'system',
+                userDisplayName: 'System',
+                userAvatar: null,
+                timestamp: new Date().toISOString(),
+                isSystem: true
+            };
+            addSystemMessage(systemMessage);
+        }
+
+        function addSystemMessage(messageData) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message border-yellow-500/20 bg-yellow-500/10';
+            
+            const timestamp = new Date(messageData.timestamp).toLocaleTimeString();
+            
+            messageElement.innerHTML = `
+                <div class="flex items-center justify-center">
+                    <div class="text-center">
+                        <span class="text-yellow-400 text-sm">
+                            <i class="fas fa-info-circle mr-2"></i>${messageData.text}
+                        </span>
+                        <div class="text-xs text-gray-400 mt-1">${timestamp}</div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Additional room functions
+        function inviteFriends() {
+            alert('Invite friends feature coming soon!');
+        }
+
+        async function saveDebate() {
+            if (!currentRoom || !currentUser) return;
+            
+            try {
+                // Add room to user's saved debates
+                const userRef = window.firebaseDbMethods.doc(window.firebaseDb, 'users', currentUser.uid);
+                await window.firebaseDbMethods.updateDoc(userRef, {
+                    savedDebates: window.firebaseDbMethods.arrayUnion({
+                        roomId: currentRoom.id,
+                        roomName: currentRoom.name,
+                        topicName: currentRoom.topicName,
+                        savedAt: window.firebaseDbMethods.serverTimestamp()
+                    })
+                });
+                
+                alert('Debate saved to your profile!');
+                console.log('💾 Debate saved for user:', currentUser.uid);
+                
+            } catch (error) {
+                console.error('❌ Error saving debate:', error);
+                alert('Failed to save debate. Please try again.');
+            }
+        }
+
+        // Cleanup function
+        window.addEventListener('beforeunload', function() {
+            if (roomsUnsubscribe) {
+                roomsUnsubscribe();
+            }
+            if (messagesUnsubscribe) {
+                messagesUnsubscribe();
+            }
+            if (currentChannel) {
+                pusher.unsubscribe(`debate-room-${currentRoom.id}`);
+            }
+        });
+
+        // Console welcome message
+        console.log(`
+        🎯 DebateArena.lol - Debates Page
+        🏛️ Built in Manchester, UK
+        🚀 Status: Live with Firebase & Pusher
+        💬 Real-time debates powered by Pusher
+        🔥 Firebase integration active
+        
+        Ready to debate? Choose your topic and enter the arena! 🔥
+        `);
+    </script>
+</body>
+</html>
